@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Money - My Own Expense Tracker</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="script.js"></script>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <div class="max-w-md mx-auto bg-gray-100 shadow-md rounded px-8 pt-6 pb-8 mb-4 container">
+        <h1 class="font-bold text-black-400 text-3xl text-center">My Money</h1>
+        <form onsubmit="return false;">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-800 text-sm font-bold mb-1 text-left">
+                    Title
+                </label>
+                <input
+                    class="shadow appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                    id="title" type="text" placeholder="Title">
+            </div>
+            <div class="mb-4">
+                <label for="amount" class="block text-gray-800 text-sm font-bold mb-1 text-left">
+                    Amount
+                </label>
+                <input
+                    class="shadow appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                    id="amount" type="number" placeholder="Amount">
+            </div>
+            <div class="mb-6">
+                <label for="option" class="block text-gray-800 text-sm font-bold mb-1 text-left">
+                    Option
+                </label>
+                <select
+                    class="shadow appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                    id="option">
+                    <option value="cbi">Central Bank</option>
+                    <option value="sbi">State Bank</option>
+                    <option value="cash">Cash</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-between">
+                <button
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline"
+                    type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+
+</html>
