@@ -1,4 +1,3 @@
-const { CLIENT_ID, API_KEY, DISCOVERY_DOC, SCOPES } = require("./config");
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
@@ -30,9 +29,10 @@ function gisLoaded() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    callback: "", // defined later
+    callback: "",
   });
   gisInited = true;
+  console.log("Token Client: ", tokenClient);
   doWork();
 }
 
@@ -57,15 +57,29 @@ function handleAuthClick() {
     if (resp.error !== undefined) {
       throw resp;
     }
+    updateSheet(resp);
   };
-  const token = gapi.client.getToken();
-  console.log("Token: ", token);
-  if (token) {
-    // Skip display of account chooser and consent dialog for an existing session.
-    tokenClient.requestAccessToken({ prompt: "" });
-  } else {
+
+  if (gapi.client.getToken() === null) {
     // Prompt the user to select a Google Account and ask for consent to share their data
     // when establishing a new session.
     tokenClient.requestAccessToken({ prompt: "consent" });
+  } else {
+    // Skip display of account chooser and consent dialog for an existing session.
+    tokenClient.requestAccessToken({ prompt: "" });
   }
 }
+
+const updateSheet = async (clientDetails) => {
+  const { access_token, scope, token_type } = clientDetails;
+  const sheetsApi = scope[1];
+  try {
+    const userData = await fetch(sheetsApi, {
+      type: "GET",
+    });
+    console.log("Userdata: ", userData);
+    userData = await userData.json();
+  } catch (err) {
+    console.log("Err: ", err);
+  }
+};
