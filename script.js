@@ -52,34 +52,49 @@ function doWork() {
 /**
  *  Sign in the user upon button click.
  */
-function handleAuthClick() {
-  tokenClient.callback = async (resp) => {
+const handleAuthClick = () => {
+  let clientDetails;
+  tokenClient.callback = (resp) => {
     if (resp.error !== undefined) {
       throw resp;
     }
-    updateSheet(resp);
+    localStorage.setItem("myMoneyToken", resp.access_token);
+    clientDetails = resp;
+    updateSheet(clientDetails);
   };
 
-  if (gapi.client.getToken() === null) {
+  const acessToken = localStorage.getItem("myMoneyToken");
+  if (acessToken == null) {
+    console.log("Token doens't exist");
     // Prompt the user to select a Google Account and ask for consent to share their data
     // when establishing a new session.
     tokenClient.requestAccessToken({ prompt: "consent" });
   } else {
-    // Skip display of account chooser and consent dialog for an existing session.
     tokenClient.requestAccessToken({ prompt: "" });
   }
-}
+};
 
 const updateSheet = async (clientDetails) => {
   const { access_token, scope, token_type } = clientDetails;
-  const sheetsApi = scope[1];
+  const sheetsApi = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/MyMoney`;
   try {
-    const userData = await fetch(sheetsApi, {
-      type: "GET",
+    // Include the access token in the authorization header
+    const response = await fetch(sheetsApi, {
+      method: "GET", // Assuming you want to fetch data (change to POST for updates)
+      headers: {
+        Authorization: `Bearer ${access_token}`, // Authorization header with access token
+        "Content-Type": "application/json", // Optional, depending on API requirements
+      },
     });
-    console.log("Userdata: ", userData);
-    userData = await userData.json();
+
+    if (!response.ok) {
+      throw new Error(`Error fetching data: ${response.statusText}`);
+    }
+
+    const ExistingExpenses = await response.json();
+    console.log("Userdata: ", ExistingExpenses);
+    const newLength = ++ExistingExpenses.values.length;
   } catch (err) {
-    console.log("Err: ", err);
+    console.error("Error: ", err);
   }
 };
