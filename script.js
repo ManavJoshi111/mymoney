@@ -19,7 +19,6 @@ async function initializeGapiClient() {
     discoveryDocs: [DISCOVERY_DOC],
   });
   gapiInited = true;
-  doWork();
 }
 
 /**
@@ -33,13 +32,12 @@ function gisLoaded() {
   });
   gisInited = true;
   console.log("Token Client: ", tokenClient);
-  doWork();
 }
 
 /**
  * Enables user interaction after all libraries are loaded.
  */
-function doWork() {
+function doWork(e) {
   if (gapiInited && gisInited) {
     try {
       handleAuthClick();
@@ -60,7 +58,7 @@ const handleAuthClick = () => {
     }
     localStorage.setItem("myMoneyToken", resp.access_token);
     clientDetails = resp;
-    updateSheet(clientDetails);
+    getSheetData(clientDetails);
   };
 
   const acessToken = localStorage.getItem("myMoneyToken");
@@ -74,16 +72,16 @@ const handleAuthClick = () => {
   }
 };
 
-const updateSheet = async (clientDetails) => {
+const getSheetData = async (clientDetails) => {
+  console.log("clientDetails: ", clientDetails);
   const { access_token, scope, token_type } = clientDetails;
   const sheetsApi = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/MyMoney`;
   try {
-    // Include the access token in the authorization header
     const response = await fetch(sheetsApi, {
-      method: "GET", // Assuming you want to fetch data (change to POST for updates)
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${access_token}`, // Authorization header with access token
-        "Content-Type": "application/json", // Optional, depending on API requirements
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
       },
     });
 
@@ -91,10 +89,58 @@ const updateSheet = async (clientDetails) => {
       throw new Error(`Error fetching data: ${response.statusText}`);
     }
 
-    const ExistingExpenses = await response.json();
-    console.log("Userdata: ", ExistingExpenses);
-    const newLength = ++ExistingExpenses.values.length;
+    const existingExpenses = await response.json();
+    const { title, amount, option } = getExpenseDetails();
+
+    // Determine the column to insert based on the selected option
+    let columnIndex;
+    switch (option) {
+      case "cbi":
+        columnIndex = 3; // Column index for Central Bank
+        break;
+      case "sbi":
+        columnIndex = 4; // Column index for State Bank
+        break;
+      case "cash":
+        columnIndex = 5; // Column index for Cash
+        break;
+      default:
+        throw new Error("Invalid option");
+    }
+
+    // Construct the new row to be inserted
+    const newRow = [new Date().toISOString(), title, amount];
+    // Fill the columns before the selected option with empty values
+    for (let i = 3; i < columnIndex; i++) {
+      newRow.push("");
+    }
+    // Insert the value for the selected option
+    newRow.push(amount);
+
+    // Update the Google Sheet with the new row
+    await fetch(sheetsApi, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        range: "MyMoney!A1",
+        majorDimension: "ROWS",
+        values: [newRow],
+      }),
+    });
+
+    console.log("Data inserted successfully.");
   } catch (err) {
     console.error("Error: ", err);
   }
+};
+
+const getExpenseDetails = () => {
+  const title = document.getElementById("title").value;
+  const amount = document.getElementById("amount").value;
+  const option = document.getElementById("method").value;
+
+  return { title, amount, option };
 };

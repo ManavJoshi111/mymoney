@@ -12,7 +12,7 @@
 <body>
     <div class="max-w-md mx-auto bg-gray-100 shadow-md rounded px-8 pt-6 pb-8 mb-4 container">
         <h1 class="font-bold text-black-400 text-3xl text-center">My Money</h1>
-        <form onsubmit="return false;">
+        <form>
             <div class="mb-4">
                 <label for="title" class="block text-gray-800 text-sm font-bold mb-1 text-left">
                     Title
@@ -35,7 +35,7 @@
                 </label>
                 <select
                     class="shadow appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
-                    id="option">
+                    id="method">
                     <option value="cbi">Central Bank</option>
                     <option value="sbi">State Bank</option>
                     <option value="cash">Cash</option>
@@ -44,7 +44,7 @@
             <div class="flex items-center justify-between">
                 <button
                     class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline"
-                    type="submit">
+                    type="button" onclick="doWork()">
                     Submit
                 </button>
             </div>
